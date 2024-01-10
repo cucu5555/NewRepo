@@ -1,44 +1,43 @@
-package uygulama;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Server {
+public class mainserver { //bir port numarası ve bir abone listes baslattı.
     private List<String> subscribers;
     private int port;
 
-    public Server(int port) {
+    public mainserver(int port) {
         this.subscribers = new CopyOnWriteArrayList<>();
         this.port = port;
     }
 
     public void start() {
         try {
-            ServerSocket serverSocket = new ServerSocket(port);
+            ServerSocket serverSocket = new ServerSocket(port); //Server Socket Oluşturma:
             System.out.println("Server bu portta başladi " + port);
 
-            while (true) {
+            while (true) {//İstemci Bağlantılarını Bekleme
                 Socket clientSocket = serverSocket.accept();
-                new Thread(() -> handleClient(clientSocket)).start();
+                new Thread(() -> handleClient(clientSocket)).start(); //Yeni İstemci Bağlantısı İçin Thread Başlatma:
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleClient(Socket clientSocket) {
+    private void handleClient(Socket clientSocket) {//Input ve Output Stream Oluşturma
         try (
                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())
         ) {
-            String request = (String) in.readObject();
-            String[] parts = request.split(" ");
+            String request = (String) in.readObject(); //İstemciden İstek Okuma:
+            String[] parts = request.split(" "); //İstekten Komut ve Parametreleri Ayırma:
 
-            if ("ABONE OL".equals(parts[0])) {
+            if ("ABONE OL".equals(parts[0])) {//Gelen Komuta Göre İşlem Yapma:
                 handleSubscribe(parts[1]);
-            } else if ("ABONE OLUN".equals(parts[0])) {
+            } else if ("ABONE LİSTESİ".equals(parts[0])) {
                 sendSubscribersList(out);
             } else if (parts.length == 2 && parts[0].matches("\\d+")) {
                 handleUpdateMessage(Integer.parseInt(parts[0]), parts[1]);
@@ -48,26 +47,29 @@ public class Server {
         }
     }
 
-    private void handleSubscribe(String username) {
+    private void handleSubscribe(String username) {// abone ekleme
         subscribers.add(username);
         System.out.println(username + " abone oldu.");
     }
 
-    private void sendSubscribersList(ObjectOutputStream out) throws IOException {
+    private void sendSubscribersList(ObjectOutputStream out) throws IOException {//Abone listesi
         out.writeObject(subscribers);
         System.out.println("Abone listesini Clientte gönder.");
     }
 
     private void handleUpdateMessage(int sequenceNumber, String message) {
         System.out.println("GÜncelleme mesaji alindi: " + sequenceNumber + " " + message);
-        // Handle the update message, update the internal state if needed.
+        // Güncelleme mesajını işleyin, gerekirse dahili durumu güncelleyin.
     }
 
-    public static void main(String[] args) {
-        Server server = new Server(12345);
+    public static void main(String[] args) { // serverı bu portta başlat
+        mainserver server = new mainserver(12345);
         server.start();
     }
 }
+
+
+
 
 
            
