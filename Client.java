@@ -1,34 +1,38 @@
-package uygulama;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-public class Client {
+public class mainclient {
     private String serverAddress;
     private int serverPort;
 
-    public Client(String serverAddress, int serverPort) {
+    public mainclient(String serverAddress, int serverPort) { //bir port numarası ve bir abone listesi tanımladık
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
 
     public void subscribe(String username) {
         try (
-                Socket socket = new Socket(serverAddress, serverPort);
+                Socket socket = new Socket(serverAddress, serverPort);// sunucuya bağlanma
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream in = new ObjectInputStream(socket.getInputStream())
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream())// soketin veri alışverisi nesnelerle
         ) {
-            out.writeObject("SUBSCRIBE " + username);
-            System.out.println("Subscribed to the server.");
+            out.writeObject("ABONE OL " + username);
+            System.out.println("servera abone olundu.");//sunucuya aboen ol istegi ve olundu bildirimi
 
-            // Example: Receive the list of subscribers from the server
-            List<String> subscribersList = (List<String>) in.readObject();
-            System.out.println("Subscribers list: " + subscribersList);
+            // Örnek: Sunucudan abone listesini alma
+            List<Object> subscribersList = (List<Object>) in.readObject();
+            System.out.println("ABONE LİSTESİ: " + subscribersList);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
+    public static void main(String[] args) {
+        mainclient client = new mainclient("localhost", 12345);
+        client.subscribe("Cüneyt");
+    }
+}
     public static void main(String[] args) {
         Client client = new Client("localhost", 12345);
         client.subscribe("Cüneyt");
